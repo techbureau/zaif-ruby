@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'zaif/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "zaif"
+  spec.name          = "zaif4ruby"
   spec.version       = Zaif::VERSION
-  spec.authors       = ["Palon"]
+  spec.authors       = ["Palon", "RossyWhite"]
   spec.email         = ["palon7@gmail.com"]
   spec.summary       = %q{Zaif API wrapper.}
   spec.description   = %q{Zaif API wrapper for monacoin/bitcoin trade.}
-  spec.homepage      = "https://github.com/palon7/zaif-ruby"
+  spec.homepage      = "https://github.com/techbureau"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

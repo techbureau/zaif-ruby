@@ -19,6 +19,8 @@ module Zaif
             @api_secret = opt[:api_secret] || nil
             @zaif_public_url = "https://api.zaif.jp/api/1/"
             @zaif_trade_url = "https://api.zaif.jp/tapi"
+            @zaif_futures_public_url = "https://api.zaif.jp/fapi/1/"
+            @zaif_leverage_trade_url = "https://api.zaif.jp/tlapi"
         end
 
         def set_api_key(api_key, api_secret)
@@ -65,7 +67,7 @@ module Zaif
         #
         # Trade API
         #
-        
+
         # Get user infomation.
         # Need api key.
         # @return [Hash] Infomation of user.
@@ -73,11 +75,11 @@ module Zaif
             json = post_ssl(@zaif_trade_url, "get_info", {})
             return json
         end
-        
+
         # Get your trade history.
         # Avalible options: from. count, from_id, end_id, order, since, end, currency_pair
         # Need api key.
-        # @param [Hash] 
+        # @param [Hash]
         def get_my_trades(option = {})
             json = post_ssl(@zaif_trade_url, "trade_history", option)
             # Convert to datetime
@@ -136,6 +138,138 @@ module Zaif
             option["address"] = address
             option["amount"] = amount
             json = post_ssl(@zaif_trade_url, "withdraw", option)
+            return json
+        end
+
+        #
+        # Futures Public API
+        #
+
+        # Get last price of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_last_price(group_id, currency_code = nil, counter_currency_code = "jpy")
+            if ['all', 'active'].include?(group_id)
+                json = get_ssl(@zaif_futures_public_url + "last_price/" + group_id)
+                return json
+            else
+                json = get_ssl(@zaif_futures_public_url + "last_price/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            end
+            return json["last_price"]
+        end
+
+        # Get ticker of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_ticker(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "ticker/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get trades of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_trades(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "trades/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get depth of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_depth(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "depth/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get groups of *group_id*
+        # @param [String]  group_id Id of group
+        def get_futures_groups(group_id = "all")
+            json = get_ssl(@zaif_futures_public_url + "groups/" + group_id)
+            return json
+        end
+
+        #
+        # Leverage Trade API
+        #
+
+        # Get history of leverage trade.
+        # Avalible options: from. count, from_id, end_id, order, since, end, currency_pair
+        # Need api key.
+        # @return [Hash] Infomation of positions
+        def get_leverage_positions(type, group_id = nil, option = {})
+            option["type"] = type
+            option["group_id"] = group_id
+            json = post_ssl(@zaif_leverage_trade_url, "get_positions", option)
+            return json
+        end
+
+        # Get your details of leverage trade.
+        # Avalible options: from. count, from_id, end_id, order, since, end, currency_pair
+        # Need api key.
+        # @param [Hash] Infomation of details
+        def get_leverage_position_history(type, leverage_id, group_id = nil)
+            option = {}
+            option["type"] = type
+            option["leverage_id"] = leverage_id
+            unless group_id.nil?
+                option["group_id"] = group_id
+            end
+
+            json = post_ssl(@zaif_leverage_trade_url, "position_history", option)
+            return json
+        end
+
+        # Get your active orders.
+        # Avalible options: currency_pair
+        # Need api key.
+        # @return [Hash] Infomation of active positions
+        def get_leverage_active_positions(type, group_id = nil, currency_pair = nil)
+            option = {}
+            option["type"] = type
+            unless group_id.nil?
+                option["group_id"] = group_id
+            end
+            unless currency_pair.nil?
+                option["currency_pair"] = currency_pair
+            end
+            json = post_ssl(@zaif_leverage_trade_url, "active_positions", option)
+            return json
+        end
+
+        # Issue trade.
+        # Need api key.
+        def leverage_create_position(type, currency_code, price, amount, action, leverage,
+          group_id = nil, limit = nil, stop = nil, counter_currency_code = "jpy")
+
+            currency_pair = currency_code + "_" + counter_currency_code
+            params = {:currency_pair => currency_pair, :action => action, :price => price,
+               :amount => amount, :type => type, :leverage => leverage}
+
+            params.store(:limit, limit) if limit
+            params.store(:stop, stop) if stop
+            params.store(:group_id, group_id) if group_id
+            json = post_ssl(@zaif_leverage_trade_url, "create_position", params)
+            return json
+        end
+
+        # Change your position.
+        # Need api key.
+        def leverage_change_position(type, leverage_id, price, group_id = nil, limit = nil, stop = nil)
+            params = {:type => type, :leverage_id => leverage_id, :price => price}
+            params.store(:group_id, group_id) if group_id
+            params.store(:limit, limit) if limit
+            params.store(:stop, stop) if stop
+            json = post_ssl(@zaif_leverage_trade_url, "change_position", params)
+            return json
+        end
+
+        # Cancel order.
+        # Need api key.
+        def leverage_cancel(type, leverage_id, group_id = nil)
+            params = {:type => type, :leverage_id => leverage_id}
+            params.store(:group_id, group_id) if group_id
+            json = post_ssl(@zaif_leverage_trade_url, "cancel_position", params)
             return json
         end
 
@@ -228,6 +362,6 @@ module Zaif
                 sleep(@cool_down_time)
             end
         end
-        
+
     end
 end

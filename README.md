@@ -1,3 +1,5 @@
+This repo is forked from [palon7/zaif-ruby](https://github.com/palon7/zaif-ruby)
+
 # Zaif
 
 Zaif API wrapper for ruby.
@@ -6,7 +8,7 @@ Zaif API wrapper for ruby.
 
 Add this line to your application's Gemfile:
 
-    gem 'zaif'
+    gem 'zaif4ruby'
 
 And then execute:
 
@@ -14,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install zaif
+    $ gem install zaif4ruby
 
 ## Usage
 
