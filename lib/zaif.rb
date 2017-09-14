@@ -140,7 +140,6 @@ module Zaif
             return json
         end
 
-
         #
         # Futures Public API
         #
@@ -188,7 +187,6 @@ module Zaif
             json = get_ssl(@zaif_futures_public_url + "groups/" + group_id)
             return json
         end
-
 
         #
         # Class private method
