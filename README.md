@@ -1,3 +1,5 @@
+This repo is forked from [palon7/zaif-ruby](https://github.com/palon7/zaif-ruby)
+
 # Zaif
 
 Zaif API wrapper for ruby.
