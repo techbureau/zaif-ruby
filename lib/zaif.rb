@@ -19,6 +19,7 @@ module Zaif
             @api_secret = opt[:api_secret] || nil
             @zaif_public_url = "https://api.zaif.jp/api/1/"
             @zaif_trade_url = "https://api.zaif.jp/tapi"
+            @zaif_futures_public_url = "https://api.zaif.jp/fapi/1/"
         end
 
         def set_api_key(api_key, api_secret)
@@ -65,7 +66,7 @@ module Zaif
         #
         # Trade API
         #
-        
+
         # Get user infomation.
         # Need api key.
         # @return [Hash] Infomation of user.
@@ -73,11 +74,11 @@ module Zaif
             json = post_ssl(@zaif_trade_url, "get_info", {})
             return json
         end
-        
+
         # Get your trade history.
         # Avalible options: from. count, from_id, end_id, order, since, end, currency_pair
         # Need api key.
-        # @param [Hash] 
+        # @param [Hash]
         def get_my_trades(option = {})
             json = post_ssl(@zaif_trade_url, "trade_history", option)
             # Convert to datetime
@@ -138,6 +139,56 @@ module Zaif
             json = post_ssl(@zaif_trade_url, "withdraw", option)
             return json
         end
+
+
+        #
+        # Futures Public API
+        #
+
+        # Get last price of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_last_price(group_id, currency_code = nil, counter_currency_code = "jpy")
+            if ['all', 'active'].include?(group_id)
+                json = get_ssl(@zaif_futures_public_url + "last_price/" + group_id)
+                return json
+            else
+                json = get_ssl(@zaif_futures_public_url + "last_price/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            end
+            return json["last_price"]
+        end
+
+        # Get ticker of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_ticker(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "ticker/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get trades of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_trades(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "trades/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get depth of *currency_code* / *counter_currency_code*.
+        # @param [String]  currency_code Base     currency code
+        # @param [String]  counter_currency_code  Counter currency code
+        def get_futures_depth(group_id, currency_code, counter_currency_code = "jpy")
+            json = get_ssl(@zaif_futures_public_url + "depth/" + group_id + "/" + currency_code + "_" + counter_currency_code)
+            return json
+        end
+
+        # Get groups of *group_id*
+        # @param [String]  group_id Id of group
+        def get_futures_groups(group_id = "all")
+            json = get_ssl(@zaif_futures_public_url + "groups/" + group_id)
+            return json
+        end
+
 
         #
         # Class private method
@@ -228,6 +279,6 @@ module Zaif
                 sleep(@cool_down_time)
             end
         end
-        
+
     end
 end
