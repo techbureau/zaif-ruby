@@ -224,7 +224,7 @@ module Zaif
         # Avalible options: currency_pair
         # Need api key.
         # @return [Hash] Infomation of active positions
-        def get_leverage_active_psitions(type, group_id = nil, currency_pair = nil)
+        def get_leverage_active_positions(type, group_id = nil, currency_pair = nil)
             option = {}
             option["type"] = type
             unless group_id.nil?
@@ -256,7 +256,7 @@ module Zaif
         # Change your position.
         # Need api key.
         def leverage_change_position(type, leverage_id, price, group_id = nil, limit = nil, stop = nil)
-            params = {:type => type, :leverage_id => leverage_id}
+            params = {:type => type, :leverage_id => leverage_id, :price => price}
             params.store(:group_id, group_id) if group_id
             params.store(:limit, limit) if limit
             params.store(:stop, stop) if stop
