@@ -5,6 +5,7 @@ require 'openssl'
 require 'uri'
 require 'net/http'
 require 'time'
+require 'websocket-client-simple'
 
 require "zaif/version"
 require "zaif/exceptions"
@@ -271,6 +272,27 @@ module Zaif
             params.store(:group_id, group_id) if group_id
             json = post_ssl(@zaif_leverage_trade_url, "cancel_position", params)
             return json
+        end
+
+        #
+        # Public stream api
+        #
+
+        def get_stream_info(currency_pair)
+            url = "wss://ws.zaif.jp:8888/stream?currency_pair=" << currency_pair
+            ws = WebSocket::Client::Simple.connect url
+
+            Enumerator.new do |yielder|
+                value = nil
+                loop do
+                    if value
+                        yielder << value
+                    end
+                    ws.on :message do |msg|
+                        value = JSON.parse(msg.data)
+                    end
+                end
+            end.lazy
         end
 
         #
