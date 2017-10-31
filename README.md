@@ -8,15 +8,11 @@ Zaif API wrapper for ruby.
 
 Add this line to your application's Gemfile:
 
-    gem 'zaif4ruby'
+    gem 'zaif4ruby', github: "techbureau/zaif-ruby"
 
 And then execute:
 
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install zaif4ruby
 
 ## Usage
 
